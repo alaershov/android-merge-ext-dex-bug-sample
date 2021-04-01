@@ -1,0 +1,86 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.example.mergeextdexbug"
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        multiDexEnabled true
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.3.2'
+
+    // This line is important for reproducing the bug!
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+
+    // This line is important for reproducing the bug!
+    // material:1.3.0 has a transitive dependency on fragment 1.0.0
+    // appcompat:1.2.0 has a transitive dependency on fragment 1.1.0
+    // this causes Gradle do to some dependency resolution, which in turn
+    // causes the bug itself, the DexArchiveMergerException.
+    //
+    // The bug seems to happen in situation when debugAndroidTestRuntimeClasspath
+    // has only one version of some dependency (for example, fragment:1.1.0), and
+    // debugRuntimeClasspath has several versions (for example, fragment:1.0.0 and 1.1.0),
+    // and dependency version resolution takes place.
+    implementation 'com.google.android.material:material:1.3.0'
+
+    testImplementation 'junit:junit:4.13.2'
+
+    // This line is important for reproducing the bug!
+    testImplementation 'androidx.appcompat:appcompat:1.2.0'
+
+    // This line is important for reproducing the bug!
+    androidTestImplementation 'androidx.appcompat:appcompat:1.2.0'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
+
+// The bug happens randomly, because the order of execution of tasks
+// mergeExtDexDebug and mergeExtDexDebugAndroidTest is not defined.
+// The bug happens only when the task mergeExtDexDebugAndroidTest executes or
+// starts executing before mergeExtDexDebug.
+
+// uncomment this to reproduce the bug 100% stable
+gradle.projectsEvaluated {
+    tasks.named('mergeExtDexDebug').configure {
+        mustRunAfter tasks.named('mergeExtDexDebugAndroidTest')
+    }
+}
+
+// uncomment this to fix the bug
+//gradle.projectsEvaluated {
+//    tasks.named('mergeExtDexDebugAndroidTest').configure {
+//        mustRunAfter tasks.named('mergeExtDexDebug')
+//    }
+//}
