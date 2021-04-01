@@ -1,4 +1,4 @@
-# Sample project for bug with mergeExtDex bug
+# Sample project for bug with mergeExtDex task
 
 ## Clean your Gradle transforms cache
 
