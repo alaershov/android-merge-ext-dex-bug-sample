@@ -3,13 +3,13 @@
 ## Clean your Gradle transforms cache
 
 ```
-rm -rf $GRADLE_HOME/caches/transforms*
+rm -rf ~/.gradle/caches/transforms*
 ```
 
 ## Run Gradle task
 
 ```
-./gradlew --rerun-tasks --stacktrace app:mergeExtDexDebug app:mergeExtDexDebugAndroidTest
+./gradlew --rerun-tasks --stacktrace app:assembleDebug app:assembleDebugAndroidTest
 ```
 
 ## Get a build error
