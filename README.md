@@ -1,5 +1,11 @@
 # Sample project for bug with mergeExtDex bug
 
+## Clean your Gradle transforms cache
+
+```
+rm -rf $GRADLE_HOME/caches/transforms*
+```
+
 ## Run Gradle task
 
 ```
